@@ -433,34 +433,36 @@ npm run timeloop</code></pre>
         const manualModal = document.getElementById('manual-modal');
         const manualClose = document.getElementById('manual-close');
 
-        manualBtn.addEventListener('click', () => {
-            manualModal.style.display = 'block';
-        });
+        if (manualBtn && manualModal && manualClose) {
+            manualBtn.addEventListener('click', () => {
+                manualModal.style.display = 'block';
+            });
 
-        manualClose.addEventListener('click', () => {
-            manualModal.style.display = 'none';
-        });
-
-        // Close manual with ESC key or toggle with '?'
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && manualModal.style.display === 'block') {
+            manualClose.addEventListener('click', () => {
                 manualModal.style.display = 'none';
-            }
-            if (e.key === '?') {
-                if (manualModal.style.display === 'block') {
+            });
+
+            // Close manual with ESC key or toggle with '?'
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && manualModal.style.display === 'block') {
                     manualModal.style.display = 'none';
-                } else {
-                    manualModal.style.display = 'block';
                 }
-            }
-        });
+                if (e.key === '?') {
+                    if (manualModal.style.display === 'block') {
+                        manualModal.style.display = 'none';
+                    } else {
+                        manualModal.style.display = 'block';
+                    }
+                }
+            });
 
-        // Close manual when clicking outside
-        manualModal.addEventListener('click', (e) => {
-            if (e.target === manualModal) {
-                manualModal.style.display = 'none';
-            }
-        });
+            // Close manual when clicking outside
+            manualModal.addEventListener('click', (e) => {
+                if (e.target === manualModal) {
+                    manualModal.style.display = 'none';
+                }
+            });
+        }
     </script>
 </body>
 </html>
