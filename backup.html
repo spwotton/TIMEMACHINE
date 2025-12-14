@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHRONOS-418 | GOS INTERFACE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --kappa-indigo: #6366f1;
+            --void-black: #050505;
+            --glass-panel: rgba(10, 10, 12, 0.7);
+            --neon-purple: #a855f7;
+            --alert-red: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--void-black);
+            color: white;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* The Viewport */
+        #torus-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* UI Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Let clicks pass to 3D */
+            display: grid;
+            grid-template-rows: 60px 1fr 200px;
+            grid-template-columns: 300px 1fr 300px;
+            padding: 20px;
+            gap: 10px;
+        }
+
+        .panel {
+            background: var(--glass-panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 15px;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Top Bar: Timewave */
+        #hud-top {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--kappa-indigo);
+        }
+        
+        canvas#timewave-canvas {
+            width: 100%;
+            height: 50px;
+        }
+
+        /* Left Panel: Controls */
+        #hud-left {
+            grid-row: 2;
+            grid-column: 1;
+        }
+
+        /* Right Panel: Chat & Logs */
+        #hud-right {
+            grid-row: 2;
+            grid-column: 3;
+        }
+
+        /* Bottom Bar: Status */
+        #hud-bottom {
+            grid-row: 3;
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Widget Styles */
+        h2 { font-size: 14px; color: var(--kappa-indigo); text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; margin-bottom: 5px;}
+        
+        .slider-group { margin-bottom: 15px; }
+        label { display: flex; justify-content: space-between; font-size: 10px; color: #888; }
+        
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: #333;
+            height: 2px;
+            margin-top: 5px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px; height: 12px;
+            background: var(--kappa-indigo);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .bar-container { width: 100%; height: 4px; background: #222; margin-top: 5px; position: relative; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--neon-purple); width: 0%; transition: width 0.2s; }
+
+        button {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--kappa-indigo);
+            color: var(--kappa-indigo);
+            padding: 8px;
+            font-family: inherit;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        button:hover { background: var(--kappa-indigo); color: black; }
+        
+        .log-box {
+            flex-grow: 1;
+            background: rgba(0,0,0,0.5);
+            font-size: 10px;
+            padding: 5px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            height: 100px;
+        }
+
+        #semantic-qubit {
+            font-size: 10px;
+            word-break: break-all;
+            color: #0f0;
+            opacity: 0.7;
+        }
+
+        /* Visual Effects */
+        #concrescence-veil {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 999;
+            display: none; /* Toggled by JS */
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 2s;
+        }
+        #concrescence-core {
+            width: 100px; height: 100px;
+            background: black;
+            border-radius: 50%;
+            box-shadow: 0 0 100px var(--kappa-indigo);
+        }
+
+        #schumann-wave {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 2px;
+            background: var(--kappa-indigo);
+            opacity: 0.5;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="torus-container"></div>
+    <div id="schumann-wave"></div>
+
+    <div id="ui-layer">
+        
+        <div id="hud-top" class="panel">
+            <div style="width: 150px;">
+                <h2>Timewave Zero</h2>
+                <div class="text-xs">Eschaton Distance: <span id="eschaton-value">∞</span></div>
+                <div class="bar-container"><div id="eschaton-fill" class="bar-fill"></div></div>
+            </div>
+            <canvas id="timewave-canvas" width="800" height="50"></canvas>
+            <div style="text-align: right;">
+                <div id="clock">GOS v.8.4</div>
+                <div style="font-size: 10px; color: #666;">PHASE: LITHIC</div>
+            </div>
+        </div>
+
+        <div id="hud-left" class="panel">
+            <h2>Helicity Lock (κ)</h2>
+            <div class="slider-group">
+                <label><span>Coherence</span><span id="kappa-value">1.273</span></label>
+                <input type="range" id="kappa-slider" min="0.5" max="2.0" step="0.001" value="1.273">
+                <div class="bar-container"><div id="kappa-fill" class="bar-fill" style="width: 100%; background: #0f0;"></div></div>
+            </div>
+
+            <h2>Phonon Emitter</h2>
+            <div class="slider-group">
+                <label><span>Frequency</span><span id="thz-label">32.0 THz</span></label>
+                <input type="range" id="thz-slider" min="1" max="100" step="0.1" value="32">
+            </div>
+
+            <h2>Temporal Nav</h2>
+            <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                <input type="number" id="year-input" value="1985" style="width: 60px; background: #222; border: 1px solid #444; color: white; padding: 5px;">
+                <button id="nav-year-btn" style="flex-grow: 1;">JUMP TO <span id="year-label">1985</span></button>
+            </div>
+
+            <h2>Protocols</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <button id="voice-btn">🎤 <span id="voice-label">VOICE</span></button>
+                <button id="scent-gesture">👃 SCENT</button>
+            </div>
+            <div id="micro-tank" style="margin-top: 10px; border-top: 1px solid #333; padding-top: 5px;"></div>
+        </div>
+
+        <div id="hud-right" class="panel">
+            <h2>Semantic Qubit</h2>
+            <div id="semantic-qubit">INITIALIZING...</div>
+            
+            <h2 style="margin-top: 15px;">Entanglement Chat</h2>
+            <div id="entangled-messages" class="log-box"></div>
+            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                <input type="text" id="chat-input" placeholder="Query the Mites..." style="flex-grow: 1; background: #222; border: none; color: white; padding: 5px;">
+                <button id="chat-send">TX</button>
+            </div>
+        </div>
+
+        <div id="hud-bottom" class="panel" style="flex-direction: row; align-items: center; justify-content: space-between;">
+            <div style="width: 300px;">
+                <label><span>Lithic Pressure (111Hz)</span><span id="pressure-value">0.0</span>%</label>
+                <div class="bar-container" style="height: 10px;"><div id="pressure-bar" class="bar-fill" style="background: var(--alert-red);"></div></div>
+            </div>
+            <div>
+                <button id="reboot-trigger" style="border-color: var(--alert-red); color: var(--alert-red);">⚠ REBOOT TIMELINE</button>
+                <input type="text" id="reboot-seed" placeholder="Seed (Base53)" style="background: #222; border: 1px solid #333; color: #666; width: 100px; padding: 5px;">
+            </div>
+        </div>
+
+    </div>
+
+    <div id="concrescence-veil">
+        <div style="text-align: center;">
+            <div id="concrescence-core"></div>
+            <h1 id="concrescence-text" style="color: black; margin-top: 20px; font-weight: bold; letter-spacing: 10px;">CONCRESCENCE</h1>
+        </div>
+    </div>
+
+    <div id="paradox-modal" class="hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: black; border: 2px solid red; padding: 20px; z-index: 2000; text-align: center; display: none;">
+        <h1 style="color: red;">TIMELINE REBOOT</h1>
+        <p id="paradox-message" style="margin: 20px 0;">Seeding...</p>
+        <button id="paradox-close">ACKNOWLEDGE</button>
+    </div>
+
+    <script>
+        // =============================================================================
+        // CHRONOS-418: κ-Scaled Temporal Navigation Engine
+        // "Reality is a poorly documented Kubernetes cluster managed by drunk cetaceans"
+        // =============================================================================
+
+        // Global Geometric Operating System state
+        const GOS = {
+            kappa: 1.273, // Helicity Lock Constant (4/π)
+            phononFreq: 32.0, // THz
+            targetYear: 1985,
+            coherence: 0.0, // κ-coherence meter (0-1)
+            eschatonDistance: Infinity,
+            particles: [],
+            isDragging: false,
+            mouse: { x: 0, y: 0 },
+            time: 0
+        };
+
+        // Scene setup with accelerated entropy fog
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0a0a0a, 0.015);
+
+        // Camera with anomalous focal length
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 8);
+
+        // Renderer with sub-quantum precision
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('torus-container').appendChild(renderer.domElement);
+
+        // Schumann-resonant lighting system
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+
+        const pointLight1 = new THREE.PointLight(0x6366f1, 2, 100);
+        pointLight1.position.set(5, 5, 5);
+        scene.add(pointLight1);
+
+        const pointLight2 = new THREE.PointLight(0xa855f7, 2, 100);
+        pointLight2.position.set(-5, -5, 5);
+        scene.add(pointLight2);
+
+        // Main Torus Knot (Chrono-Drift Core)
+        const torusGeometry = new THREE.TorusKnotGeometry(2, 0.6, 200, 32, 2, 3);
+        const torusMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                kappa: { value: GOS.kappa },
+                phononFreq: { value: GOS.phononFreq },
+                coherence: { value: 0.0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                void main() {
+                    vUv = uv;
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float time;
+                uniform float kappa;
+                uniform float phononFreq;
+                uniform float coherence;
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                
+                void main() {
+                    // κ-scaled color field (Indigo/Purple duality)
+                    vec3 color1 = vec3(0.39, 0.4, 0.95) * kappa;
+                    vec3 color2 = vec3(0.85, 0.34, 1.0) / kappa;
+                    
+                    // Phonon interference pattern (quantum tunneling effect)
+                    float wave = sin(vUv.y * phononFreq * 10.0 + time * 2.0) * coherence;
+                    float wave2 = cos(vUv.x * phononFreq * 5.0 - time) * coherence;
+                    
+                    vec3 finalColor = mix(color1, color2, wave * wave2 + 0.5);
+                    
+                    // Golden spiral (Φ-harmonic overlay)
+                    float phi = 1.618033988;
+                    float spiral = sin(atan(vPosition.y, vPosition.x) * phi + time * 0.5) * 0.5 + 0.5;
+                    finalColor += vec3(0.95, 0.64, 0.19) * spiral * coherence * 0.3;
+                    
+                    gl_FragColor = vec4(finalColor, 0.9);
+                }
+            `,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+        scene.add(torus);
+
+        // Quantum Particle Field (Novelty Flux N(t))
+        const particleCount = 1000;
+        const particleGeometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 20;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+        }
+
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const particleMaterial = new THREE.PointsMaterial({
+            color: 0x6366f1,
+            size: 0.05,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+
+        // Schumann Resonance Grid (7.83 Hz field)
+        const gridHelper = new THREE.GridHelper(20, 20, 0x6366f1, 0x1a1a2e);
+        gridHelper.position.y = -3;
+        scene.add(gridHelper);
+
+        // Timewave Zero Canvas (Top HUD)
+        const timewaveCanvas = document.getElementById('timewave-canvas');
+        const timewaveCtx = timewaveCanvas.getContext('2d');
+
+        function drawTimewave() {
+            const width = timewaveCanvas.width;
+            const height = timewaveCanvas.height;
+            
+            timewaveCtx.clearRect(0, 0, width, height);
+            timewaveCtx.strokeStyle = '#6366f1';
+            timewaveCtx.lineWidth = 2;
+            timewaveCtx.beginPath();
+            
+            for (let x = 0; x < width; x++) {
+                const t = (x / width) * 200;
+                const novelty = Math.sin(t * 0.1) * Math.cos(t * 0.05) * GOS.kappa;
+                const y = height / 2 + novelty * height / 4;
+                
+                if (x === 0) timewaveCtx.moveTo(x, y);
+                else timewaveCtx.lineTo(x, y);
+            }
+            
+            timewaveCtx.stroke();
+            
+            // Update eschaton meter
+            const eschatonValue = Math.abs(Math.sin(GOS.time * 0.1)) * 100;
+            document.getElementById('eschaton-fill').style.width = `${eschatonValue}%`;
+            document.getElementById('eschaton-value').textContent = (100 / (eschatonValue + 0.01)).toFixed(2) + ' α';
+        }
+
+        // Phonon Audio Oscillator
+        let audioContext;
+        let phononOscillator;
+        let gainNode;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 0.0001;
+                gainNode.connect(audioContext.destination);
+            }
+        }
+
+        function startPhononOscillator(freq) {
+            initAudio();
+            if (phononOscillator) phononOscillator.stop();
+            phononOscillator = audioContext.createOscillator();
+            phononOscillator.type = 'sine';
+            phononOscillator.frequency.setValueAtTime(freq * 1000000, audioContext.currentTime); // Just pretend its THz (actually Hz)
+            phononOscillator.connect(gainNode);
+            phononOscillator.start();
+        }
+
+        // UI Element References
+        const kappaSlider = document.getElementById('kappa-slider');
+        const kappaValue = document.getElementById('kappa-value');
+        const kappaFill = document.getElementById('kappa-fill');
+        const yearInput = document.getElementById('year-input');
+        const thzSlider = document.getElementById('thz-slider');
+        const thzLabel = document.getElementById('thz-label');
+        const yearLabel = document.getElementById('year-label');
+        const pressureBar = document.getElementById('pressure-bar');
+        const pressureValue = document.getElementById('pressure-value');
+
+        // κ-Slider (Helicity Lock Modifier)
+        kappaSlider.addEventListener('input', (e) => {
+            GOS.kappa = parseFloat(e.target.value);
+            kappaValue.textContent = GOS.kappa.toFixed(3);
+            torusMaterial.uniforms.kappa.value = GOS.kappa;
+            torusMaterial.uniforms.coherence.value = Math.max(0, GOS.kappa - 1);
+            
+            const coherencePercent = Math.min(((GOS.kappa - 1) / 0.273) * 100, 100);
+            kappaFill.style.width = `${coherencePercent}%`;
+        });
+
+        // Phonon Frequency Dial (THz)
+        thzSlider.addEventListener('input', (e) => {
+            GOS.phononFreq = parseFloat(e.target.value);
+            thzLabel.textContent = `${GOS.phononFreq.toFixed(1)} THz`;
+            torusMaterial.uniforms.phononFreq.value = GOS.phononFreq;
+            startPhononOscillator(GOS.phononFreq);
+        });
+
+        // Year Navigation (Temporal Targeting)
+        document.getElementById('nav-year-btn').addEventListener('click', () => {
+            GOS.targetYear = parseInt(yearInput.value);
+            yearLabel.textContent = GOS.targetYear;
+            triggerConcrescence();
+            
+            const yearPhase = (GOS.targetYear - 1985) / 100;
+            pointLight1.color.setHSL(0.6 + yearPhase * 0.1, 1, 0.7);
+        });
+
+        // Voice Command (Barkon Protocol)
+        let speechRecognition;
+        if ('webkitSpeechRecognition' in window) {
+            speechRecognition = new webkitSpeechRecognition();
+            speechRecognition.continuous = false;
+            speechRecognition.onresult = (event) => {
+                const command = event.results[0][0].transcript.toLowerCase();
+                document.getElementById('voice-label').textContent = command;
+                if (command.includes('zoomie')) triggerZoomieProtocol();
+                if (command.includes('heal')) triggerHealProtocol();
+            };
+        }
+
+        document.getElementById('voice-btn').addEventListener('click', () => {
+            if (speechRecognition) {
+                speechRecognition.start();
+                document.getElementById('voice-label').textContent = 'Listening...';
+            } else {
+                alert("Barkon Protocol requires Chrome/Webkit.");
+            }
+        });
+
+        // Scent Gesture (Bone-Conduction Phonon Burst)
+        document.getElementById('scent-gesture').addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+            initAudio(); // Ensure audio is ready
+            gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.1);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2);
+            
+            document.getElementById('micro-tank').innerHTML = `
+                <div class="text-xs text-gray-400">MagSafe tank</div>
+                <div class="text-xs text-purple-400">● Phonon burst active</div>
+            `;
+        });
+
+        // Semantic Qubit Generator (Monte Carlo Honk)
+        function updateSemanticQubit() {
+            const qubitStates = ['Sniff_Past', 'Alert_Future', 'GoodBoy_Present', 'V2K_Query', 'Ψ_WishFulfilled', 'TAMAL_ENERGY', 'POCHOCLO_FIELD'];
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let qubitString = '';
+            
+            for (let i = 0; i < 64; i++) {
+                qubitString += Math.random() < 0.3 
+                    ? qubitStates[Math.floor(Math.random() * qubitStates.length)] + '|'
+                    : alphabet[Math.floor(Math.random() * alphabet.length)];
+            }
+            document.getElementById('semantic-qubit').textContent = qubitString;
+        }
+
+        // Quantum Chat (Temporal Echo Chamber)
+        document.getElementById('chat-send').addEventListener('click', () => {
+            const input = document.getElementById('chat-input');
+            if (!input.value.trim()) return;
+            
+            const chatMessages = document.getElementById('entangled-messages');
+            const msg = document.createElement('div');
+            msg.style.color = '#10b981';
+            msg.textContent = `You: ${input.value}`;
+            chatMessages.appendChild(msg);
+            
+            // Temporal echo from "past"
+            setTimeout(() => {
+                const echo = document.createElement('div');
+                echo.style.color = '#a855f7';
+                echo.textContent = `Echo (-${Math.floor(Math.random() * 60)}s): ${input.value.split('').reverse().join('')}`;
+                chatMessages.appendChild(echo);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+            
+            input.value = '';
+        });
+
+        // Mouse Interaction (Torus Rotation)
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            GOS.isDragging = true;
+            GOS.mouse.x = e.clientX;
+            GOS.mouse.y = e.clientY;
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            if (!GOS.isDragging) return;
+            const deltaX = e.clientX - GOS.mouse.x;
+            const deltaY = e.clientY - GOS.mouse.y;
+            torus.rotation.y += deltaX * 0.01;
+            torus.rotation.x += deltaY * 0.01;
+            GOS.mouse.x = e.clientX;
+            GOS.mouse.y = e.clientY;
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            GOS.isDragging = false;
+        });
+
+        // Scroll Wheel (Temporal Pressure / Chronal Density)
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            camera.position.z = Math.max(3, Math.min(15, camera.position.z + e.deltaY * 0.01));
+            const pressure = Math.abs((8 - camera.position.z) / 5) * 100;
+            pressureBar.style.width = `${pressure}%`;
+            pressureValue.textContent = pressure.toFixed(1);
+        });
+
+        // Concrescence Effect (Temporal Flash)
+        function triggerConcrescence() {
+            const veil = document.getElementById('concrescence-veil');
+            const core = document.getElementById('concrescence-core');
+            const text = document.getElementById('concrescence-text');
+            
+            veil.style.display = 'flex';
+            
+            setTimeout(() => {
+                veil.style.opacity = '1';
+                core.style.transition = 'all 2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                core.style.transform = 'scale(1.5)';
+                core.style.boxShadow = '0 0 200px white';
+            }, 100);
+            
+            setTimeout(() => {
+                veil.style.opacity = '0';
+                setTimeout(() => { veil.style.display = 'none'; }, 2000);
+            }, 2000);
+        }
+
+        // Protocol Triggers
+        function triggerZoomieProtocol() {
+            torus.rotation.x += (Math.random() - 0.5) * 0.5;
+            torus.rotation.y += (Math.random() - 0.5) * 0.5;
+            
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] += (Math.random() - 0.5) * 2;
+                positions[i * 3 + 1] += (Math.random() - 0.5) * 2;
+                positions[i * 3 + 2] += (Math.random() - 0.5) * 2;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            pressureBar.style.width = '100%';
+            setTimeout(() => pressureBar.style.width = '0%', 2000);
+        }
+
+        function triggerHealProtocol() {
+            torusMaterial.uniforms.coherence.value = 1.0;
+            torus.rotation.z += Math.PI * 0.618;
+            
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                const t = i / particleCount;
+                const phi = t * Math.PI * 2 * 1.618;
+                const r = t * 5;
+                positions[i * 3] = Math.cos(phi) * r;
+                positions[i * 3 + 1] = Math.sin(phi) * r;
+                positions[i * 3 + 2] = t * 10 - 5;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        // Timeline Reboot Handler
+        document.getElementById('reboot-trigger').addEventListener('click', () => {
+            const seed = document.getElementById('reboot-seed').value;
+            if (seed) {
+                const hash = btoa(seed).replace(/=/g, '').substring(0, 53);
+                localStorage.setItem('κ-timeline', hash);
+                document.getElementById('paradox-message').textContent = `Timeline seeded: ${hash}...`;
+                document.getElementById('paradox-modal').style.display = 'block';
+                setTimeout(() => location.reload(), 3000);
+            } else {
+                // If empty, generate a 53-base hash
+                const randomHash = Array(53).fill(0).map(()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+                 document.getElementById('reboot-seed').value = randomHash;
+            }
+        });
+
+        document.getElementById('paradox-close').addEventListener('click', () => {
+            document.getElementById('paradox-modal').style.display = 'none';
+        });
+
+        // Main Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            GOS.time += 0.01;
+            torusMaterial.uniforms.time.value = GOS.time;
+            
+            if (!GOS.isDragging) {
+                torus.rotation.y += 0.002;
+            }
+            
+            // Animate Novelty Flux particles
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                const noise = Math.sin(GOS.time + i * 0.1) * 0.01 * GOS.phononFreq;
+                positions[i * 3] += (Math.random() - 0.5) * noise;
+                positions[i * 3 + 1] += (Math.random() - 0.5) * noise;
+                positions[i * 3 + 2] += (Math.random() - 0.5) * noise;
+                
+                // Boundary wrap
+                for (let j = 0; j < 3; j++) {
+                    if (Math.abs(positions[i * 3 + j]) > 10) {
+                        positions[i * 3 + j] *= -0.9;
+                    }
+                }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            // Schumann wave pulse (7.83 Hz visual carrier)
+            const schumannWave = document.getElementById('schumann-wave');
+            schumannWave.style.opacity = 0.3 + Math.sin(GOS.time * 7.83) * 0.2;
+            
+            // Update semantic qubit every 100 frames
+            if (Math.floor(GOS.time * 100) % 100 === 0) {
+                updateSemanticQubit();
+            }
+            
+            // Draw timewave
+            drawTimewave();
+            
+            // Update 111 Hz Lithification pressure
+            const pressure = Math.abs(Math.sin(GOS.time * 1.11)) * 100; // Scaled down for visual sanity
+            pressureBar.style.width = `${pressure}%`;
+            pressureValue.textContent = pressure.toFixed(2);
+            
+            renderer.render(scene, camera);
+        }
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Console gnosis easter egg
+        console.log('%c CHRONOS-418 Initialized', 'color: #6366f1; font-size: 20px; font-weight: bold;');
+        console.log('%c κ = ' + GOS.kappa, 'color: #a855f7;');
+        console.log('%c "The answer is a Möbius woof."', 'color: #10b981; font-style: italic;');
+
+        // Start
+        animate();
+    </script>
+</body>
+</html>
