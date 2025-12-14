@@ -247,8 +247,222 @@
         <div>Enter: Jump to Year</div>
         <div>P: Toggle Phonon</div>
         <div>0-9: Quick Years</div>
+        <div style="margin-top: 10px; border-top: 1px solid #444; padding-top: 5px;">
+            <button id="manual-btn" style="width: 100%; padding: 5px; background: rgba(99, 102, 241, 0.3); border: 1px solid var(--kappa-indigo); color: var(--kappa-indigo); cursor: pointer; font-family: inherit; font-size: 9px;">📖 MANUAL (?)</button>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Operational Manual Modal -->
+    <div id="manual-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px;">
+        <div style="max-width: 900px; margin: 0 auto; background: #0a0a0c; border: 2px solid var(--kappa-indigo); padding: 30px; border-radius: 8px; font-family: 'Courier New', monospace; color: #fff;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--kappa-indigo); padding-bottom: 10px;">
+                <h1 style="color: var(--kappa-indigo); font-size: 24px; margin: 0;">THE Ω-SPHERE TIME MACHINE: OPERATIONAL MANUAL</h1>
+                <button id="manual-close" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 8px 15px; cursor: pointer; font-family: inherit; font-size: 12px;">✕ CLOSE</button>
+            </div>
+            
+            <p style="color: #a855f7; font-style: italic; text-align: center; margin-bottom: 30px;">"Where Toroidal Goose Turds Become Platonic Honk-Crystals"</p>
+
+            <div style="line-height: 1.6;">
+                <h2 style="color: var(--kappa-indigo); font-size: 18px; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid rgba(99, 102, 241, 0.3); padding-bottom: 5px;">1. INSTALLATION</h2>
+                
+                <pre style="background: #050505; padding: 15px; border-left: 3px solid var(--kappa-indigo); overflow-x: auto; font-size: 11px;"><code># Clone the chrono-repository
+git clone https://github.com/quantum-honks/Ω-Sphere.git
+
+# Navigate to the singularity
+cd Ω-Sphere
+
+# Bootstrap reality (requires Node 18+)
+npm install --engine=goose
+
+# Launch the chrono-interface
+npm run timeloop</code></pre>
+
+                <h3 style="color: #10b981; font-size: 14px; margin-top: 20px; margin-bottom: 10px;">System Requirements:</h3>
+                <ul style="margin-left: 20px; color: #888;">
+                    <li><strong>GPU:</strong> NVIDIA RTX 4090 or equivalent honk-processing unit</li>
+                    <li><strong>Audio:</strong> Bone conduction headphones (for 111Hz lithification)</li>
+                    <li><strong>OS:</strong> Linux (preferably Arch with honkctl kernel module)</li>
+                </ul>
+
+                <h2 style="color: var(--kappa-indigo); font-size: 18px; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid rgba(99, 102, 241, 0.3); padding-bottom: 5px;">2. CORE FEATURES</h2>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 11px;">
+                    <thead>
+                        <tr style="background: rgba(99, 102, 241, 0.2); border-bottom: 2px solid var(--kappa-indigo);">
+                            <th style="padding: 10px; text-align: left; border: 1px solid #333;">Component</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #333;">Quantum Function</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #333;">Keybinding</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">HONK-DODECAHEDRON</td>
+                            <td style="padding: 10px; border: 1px solid #333;">12-sided time crystal that replaces toroidal turds</td>
+                            <td style="padding: 10px; border: 1px solid #333; color: #10b981;">H</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">κ-Slider</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Adjust helicity lock (1.0 = linear time, 1.273 = optimal honk curvature)</td>
+                            <td style="padding: 10px; border: 1px solid #333; color: #10b981;">Mouse Scroll</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Phonon THz Dial</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Tune temporal resonance (32 THz = limonene, 37 THz = goose truth frequency)</td>
+                            <td style="padding: 10px; border: 1px solid #333; color: #10b981;">P + Mouse Drag</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Zoomie Protocol</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Decohere reality via figure-8 sprints (induces quantum barking)</td>
+                            <td style="padding: 10px; border: 1px solid #333; color: #10b981;">Voice Command: "ZOOMIE"</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Mite Meditation</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Visualize Demodex mites writing your worries into chitin-encoded null memory</td>
+                            <td style="padding: 10px; border: 1px solid #333; color: #10b981;">M</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Temporal Chat</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Send messages to past/future selves (messages only exist if observed)</td>
+                            <td style="padding: 10px; border: 1px solid #333; color: #10b981;">T</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 style="color: var(--kappa-indigo); font-size: 18px; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid rgba(99, 102, 241, 0.3); padding-bottom: 5px;">3. UPGRADED PHYSICS</h2>
+                
+                <h3 style="color: #a855f7; font-size: 14px; margin-top: 20px; margin-bottom: 10px;">A. Gravity 2.0</h3>
+                <p style="color: #ccc; margin-bottom: 10px;">Old: Spacetime curvature via mass → New: Spacetime curvature via honk amplitude</p>
+                <pre style="background: #050505; padding: 15px; border-left: 3px solid #a855f7; overflow-x: auto; font-size: 11px; margin-bottom: 10px;"><code>∇²h = 8πG/c⁴ * (κ ∙ HonkPressure)</code></pre>
+                <p style="color: #888; font-size: 11px; margin-left: 20px;">Where:</p>
+                <ul style="margin-left: 40px; color: #888; font-size: 11px;">
+                    <li>h = metric perturbation (in units of goose feathers)</li>
+                    <li>HonkPressure = acoustic force per unit V-formation</li>
+                </ul>
+
+                <h3 style="color: #a855f7; font-size: 14px; margin-top: 20px; margin-bottom: 10px;">B. The 418 Teapot Principle</h3>
+                <ul style="margin-left: 20px; color: #888;">
+                    <li>All HTTP errors are temporal conflict reports</li>
+                    <li>Error 418: "I'm a teapot" → Means you've overclocked the κ-slider</li>
+                </ul>
+
+                <h3 style="color: #a855f7; font-size: 14px; margin-top: 20px; margin-bottom: 10px;">C. Quantum Bark Tunneling</h3>
+                <ul style="margin-left: 20px; color: #888;">
+                    <li>Dogs can transmit data through time via entangled barks</li>
+                    <li>Packet loss occurs if the target year lacks sufficient treats</li>
+                </ul>
+
+                <h2 style="color: var(--kappa-indigo); font-size: 18px; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid rgba(99, 102, 241, 0.3); padding-bottom: 5px;">4. EXAMPLE SESSION</h2>
+                
+                <h3 style="color: #10b981; font-size: 14px; margin-top: 20px; margin-bottom: 10px;">Step 1: Initialize the Ω-Sphere</h3>
+                <pre style="background: #050505; padding: 15px; border-left: 3px solid #10b981; overflow-x: auto; font-size: 11px;"><code>const universe = new HonkUniverse({
+  kappa: 1.273,
+  chronoFlux: "golden",
+  gooseCount: 12 // Mandatory for dodecahedral symmetry
+});</code></pre>
+
+                <h3 style="color: #10b981; font-size: 14px; margin-top: 20px; margin-bottom: 10px;">Step 2: Target 1985</h3>
+                <pre style="background: #050505; padding: 15px; border-left: 3px solid #10b981; overflow-x: auto; font-size: 11px;"><code>./timemachine --year 1985 --honk 37.0 --protocol ZOOMIE</code></pre>
+                <p style="color: #888; margin-top: 10px; margin-left: 20px;"><strong>Output:</strong></p>
+                <ul style="margin-left: 40px; color: #888;">
+                    <li>Reality distorts into a VHS tape glitch</li>
+                    <li>Your GPU emits the scent of teen spirit and ozone</li>
+                    <li>Console logs: <span style="color: #10b981;">TIMELINE STABILIZED. HITLER NOW A GOOSE MASSAGE THERAPIST.</span></li>
+                </ul>
+
+                <h3 style="color: #10b981; font-size: 14px; margin-top: 20px; margin-bottom: 10px;">Step 3: Resolve Paradoxes</h3>
+                <pre style="background: #050505; padding: 15px; border-left: 3px solid #10b981; overflow-x: auto; font-size: 11px;"><code>universe.resolveParadox("grandfather", {
+  method: "miteMeditation",
+  payload: { chitinBuffer: "1985-07-03" }
+});</code></pre>
+
+                <h2 style="color: var(--kappa-indigo); font-size: 18px; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid rgba(99, 102, 241, 0.3); padding-bottom: 5px;">5. TROUBLESHOOTING</h2>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 11px;">
+                    <thead>
+                        <tr style="background: rgba(239, 68, 68, 0.2); border-bottom: 2px solid #ef4444;">
+                            <th style="padding: 10px; text-align: left; border: 1px solid #333;">Issue</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #333;">Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Black Hole Formation</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Reduce honk amplitude. Use κ &lt; 1.2 until singularity dissipates.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Goose Rebellion</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Sacrifice a USB cable to the USB-C altar (geese respect triboelectricity).</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Time Loops</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Blink asymmetrically (left-right-left) to break cyclic cognition.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 10px; border: 1px solid #333;">Missing Teapots</td>
+                            <td style="padding: 10px; border: 1px solid #333;">Reinstall British Empire DLC (<code>brew install imperial_units</code>).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 style="color: var(--kappa-indigo); font-size: 18px; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid rgba(99, 102, 241, 0.3); padding-bottom: 5px;">6. FINAL REALIZATION</h2>
+                
+                <div style="background: rgba(99, 102, 241, 0.1); border: 2px solid var(--kappa-indigo); padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="color: #a855f7; font-style: italic; margin-bottom: 15px; font-size: 14px;">"You aren't using the time machine—you're being used by it."</p>
+                    <ul style="list-style: none; padding: 0; color: #ccc; font-size: 12px;">
+                        <li style="margin: 10px 0;">The HONK-DODECAHEDRON was inside you all along (check your liver).</li>
+                        <li style="margin: 10px 0;">All paradoxes resolve if you stop resisting the honk.</li>
+                        <li style="margin: 10px 0;">The geese were never here. You were never here.</li>
+                    </ul>
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <div style="color: #10b981; font-weight: bold;">STATUS: Ψ = 1.000... (eternal)</div>
+                        <div style="color: #ef4444; margin-top: 10px;">NEXT: Reboot universe? (Y/N)</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(168, 85, 247, 0.1); border-radius: 8px;">
+                    <h3 style="color: #a855f7; font-size: 20px; margin-bottom: 10px;">🌀 "THE TORUS WAS JUST TRAINING WHEELS. WELCOME TO THE HONK-SPHERE."</h3>
+                    <p style="color: #888; font-size: 11px; margin-top: 15px; font-style: italic;">(To exit: Hold ESC while chanting the first 100 digits of π in goose honks.)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Manual Modal Toggle
+        const manualBtn = document.getElementById('manual-btn');
+        const manualModal = document.getElementById('manual-modal');
+        const manualClose = document.getElementById('manual-close');
+
+        if (manualBtn && manualModal && manualClose) {
+            manualBtn.addEventListener('click', () => {
+                manualModal.style.display = 'block';
+            });
+
+            manualClose.addEventListener('click', () => {
+                manualModal.style.display = 'none';
+            });
+
+            // Close manual with ESC key or toggle with '?'
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && manualModal.style.display === 'block') {
+                    manualModal.style.display = 'none';
+                }
+                if (e.key === '?') {
+                    if (manualModal.style.display === 'block') {
+                        manualModal.style.display = 'none';
+                    } else {
+                        manualModal.style.display = 'block';
+                    }
+                }
+            });
+
+            // Close manual when clicking outside
+            manualModal.addEventListener('click', (e) => {
+                if (e.target === manualModal) {
+                    manualModal.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 </html>
