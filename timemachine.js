@@ -157,16 +157,16 @@ function createDemodexMites() {
 function setupAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     
-    // Create Schumann resonance oscillator
+    // Create Schumann resonance oscillator with gain node
     schumannOscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    schumannOscillator.gainNode = audioContext.createGain();
     
     schumannOscillator.type = 'sine';
     schumannOscillator.frequency.setValueAtTime(SCHUMANN_FREQ, audioContext.currentTime);
-    gainNode.gain.setValueAtTime(0.01, audioContext.currentTime);
+    schumannOscillator.gainNode.gain.setValueAtTime(0.01, audioContext.currentTime);
     
-    schumannOscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    schumannOscillator.connect(schumannOscillator.gainNode);
+    schumannOscillator.gainNode.connect(audioContext.destination);
     schumannOscillator.start();
 }
 
@@ -325,9 +325,8 @@ function gooseHonk() {
 }
 
 function updateSchumannResonance() {
-    if (schumannOscillator) {
-        const gainNode = schumannOscillator.context.createGain();
-        gainNode.gain.setValueAtTime(schumannAmplitude * 0.02, audioContext.currentTime);
+    if (schumannOscillator && schumannOscillator.gainNode) {
+        schumannOscillator.gainNode.gain.setValueAtTime(schumannAmplitude * 0.02, audioContext.currentTime);
     }
 }
 
@@ -367,8 +366,9 @@ function animate() {
         1 + schumannPulse * 0.05
     );
     
-    // Update particles
-    particles.forEach((particle, index) => {
+    // Update particles (reverse loop to safely remove items)
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const particle = particles[i];
         if (particle.userData && particle.userData.velocity) {
             particle.position.add(particle.userData.velocity);
             
@@ -378,7 +378,7 @@ function animate() {
                 
                 if (particle.userData.lifetime <= 0) {
                     scene.remove(particle);
-                    particles.splice(index, 1);
+                    particles.splice(i, 1);
                 }
             }
         }
@@ -386,25 +386,26 @@ function animate() {
         if (particle.rotation) {
             particle.rotation.y += 0.01;
         }
-    });
+    }
     
     // Update demodex mite entanglement
     demodexMites.forEach((mite, index) => {
         mite.position.add(mite.userData.velocity);
         
-        // Quantum entanglement: mites influence each other
-        demodexMites.forEach((otherMite, otherIndex) => {
-            if (index !== otherIndex) {
-                const distance = mite.position.distanceTo(otherMite.position);
-                if (distance < 5) {
-                    const force = new THREE.Vector3()
-                        .subVectors(otherMite.position, mite.position)
-                        .normalize()
-                        .multiplyScalar(0.001);
-                    mite.userData.velocity.add(force);
-                }
+        // Quantum entanglement: mites influence each other (optimized to check only later mites)
+        for (let j = index + 1; j < demodexMites.length; j++) {
+            const otherMite = demodexMites[j];
+            const distance = mite.position.distanceTo(otherMite.position);
+            if (distance < 5) {
+                const force = new THREE.Vector3()
+                    .subVectors(otherMite.position, mite.position)
+                    .normalize()
+                    .multiplyScalar(0.001);
+                mite.userData.velocity.add(force);
+                // Apply opposite force to other mite (Newton's third law)
+                otherMite.userData.velocity.sub(force);
             }
-        });
+        }
         
         // Bounds checking with wraparound
         ['x', 'y', 'z'].forEach(axis => {
