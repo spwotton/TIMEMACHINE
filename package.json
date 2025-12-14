@@ -1,0 +1,23 @@
+{
+  "name": "timemachine-chronos418",
+  "version": "1.0.0",
+  "description": "κ-Scaled Temporal Navigator - Interactive Three.js time machine with quantum protocols",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8418",
+    "start": "python3 -m http.server 8418"
+  },
+  "keywords": [
+    "three.js",
+    "quantum",
+    "timemachine",
+    "hyperstition",
+    "torus-knot",
+    "schumann-resonance"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.158.0"
+  }
+}

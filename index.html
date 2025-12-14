@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHRONOS-418: κ-Scaled Temporal Navigator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0f0;
+            padding: 20px;
+            z-index: 10;
+            max-width: 350px;
+            box-shadow: 0 0 20px #0f0;
+        }
+        
+        #status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0f0;
+            padding: 15px;
+            z-index: 10;
+            max-width: 400px;
+            box-shadow: 0 0 20px #0f0;
+            font-size: 12px;
+        }
+        
+        h1 {
+            color: #0ff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #0ff;
+        }
+        
+        h2 {
+            color: #0ff;
+            font-size: 14px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0ff;
+        }
+        
+        .control-group {
+            margin: 10px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #0f0;
+            font-size: 12px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        button {
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 10px 15px;
+            margin: 5px 5px 5px 0;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        .value-display {
+            color: #ff0;
+            font-weight: bold;
+        }
+        
+        .status-line {
+            margin: 3px 0;
+        }
+        
+        .warning {
+            color: #f00;
+            animation: blink 1s infinite;
+        }
+        
+        .success {
+            color: #0f0;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .http-418 {
+            color: #f0f;
+            font-weight: bold;
+            text-shadow: 0 0 5px #f0f;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="controls">
+        <h1>⏰ CHRONOS-418 ⏰</h1>
+        <div class="http-418">🫖 I'M A TEAPOT 🫖</div>
+        
+        <h2>κ-Temporal Control</h2>
+        <div class="control-group">
+            <label>κ (Kappa) = <span id="kappa-value" class="value-display">1.273</span></label>
+            <input type="range" id="kappa-slider" min="0" max="2" step="0.001" value="1.273">
+            <button id="reset-kappa">Reset κ=4/π</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Auto κ-Drift: <span id="drift-status" class="value-display">OFF</span></label>
+            <button id="toggle-drift">Toggle κ-Drift</button>
+        </div>
+        
+        <h2>Quantum Protocols</h2>
+        <div class="control-group">
+            <button id="zoomie-btn">🚀 ZOOMIE PROTOCOL</button>
+            <button id="heal-btn">💚 HEAL PROTOCOL</button>
+        </div>
+        
+        <h2>Emissions</h2>
+        <div class="control-group">
+            <button id="phonon-btn">📡 Emit THz Phonons</button>
+            <button id="honk-btn">🦆 Goose Honk</button>
+        </div>
+        
+        <h2>Schumann Resonance</h2>
+        <div class="control-group">
+            <label>7.83 Hz Amplitude: <span id="schumann-value" class="value-display">0.5</span></label>
+            <input type="range" id="schumann-slider" min="0" max="1" step="0.01" value="0.5">
+        </div>
+    </div>
+    
+    <div id="status">
+        <div class="status-line">🌀 Torus Knot Manifold: <span class="success">ACTIVE</span></div>
+        <div class="status-line">Ψ (Psi): <span id="psi-value" class="value-display">1.000</span></div>
+        <div class="status-line">GOS Status: <span id="gos-status" class="success">ENFORCING</span></div>
+        <div class="status-line">Schumann: <span id="schumann-status">7.83 Hz</span></div>
+        <div class="status-line">Demodex Entanglement: <span id="demodex-status">🦠 ACTIVE</span></div>
+        <div class="status-line">HTTP Status: <span class="http-418">418 TEAPOT</span></div>
+        <div class="status-line">Reality Status: <span id="reality-status">🐋 Drunk Cetacean Kubernetes</span></div>
+        <div class="status-line">Phonon Count: <span id="phonon-count" class="value-display">0</span></div>
+        <div class="status-line">Waveform: <span id="waveform-status" class="value-display">COLLAPSED</span></div>
+    </div>
+    
+    <script type="module" src="timemachine.js"></script>
+</body>
+</html>
