@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT ORACLE - Pendulum Divination Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        #oracle-container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #0f0;
+            padding: 30px;
+            box-shadow: 0 0 30px #0f0;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #0ff;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #0ff;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .subtitle {
+            color: #0f0;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 16px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .answer {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 0 20px;
+        }
+        
+        .answer.yes {
+            color: #0f0;
+            text-shadow: 0 0 20px #0f0;
+        }
+        
+        .answer.no {
+            color: #f00;
+            text-shadow: 0 0 20px #f00;
+        }
+        
+        button {
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 15px 30px;
+            margin: 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        button:hover:not(:disabled) {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 15px #0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .question-input {
+            width: 100%;
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 12px;
+            text-align: left;
+        }
+        
+        .metric {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #0f0;
+            padding: 10px;
+        }
+        
+        .metric-label {
+            color: #0ff;
+            font-weight: bold;
+        }
+        
+        .metric-value {
+            color: #ff0;
+        }
+        
+        .warning {
+            color: #f00;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .info {
+            font-size: 11px;
+            color: #0f0;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+        
+        .pendulum {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .pendulum-visual {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #0f0;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pendulum-dot {
+            width: 20px;
+            height: 20px;
+            background: #0f0;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px #0f0;
+            transition: transform 0.1s;
+        }
+        
+        .angle-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 90px;
+            height: 2px;
+            background: #0ff;
+            transform-origin: left center;
+            box-shadow: 0 0 10px #0ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="oracle-container">
+        <h1>🔮 PROJECT ORACLE 🔮</h1>
+        <div class="subtitle">Phone Gyro → Pendulum Divination Engine</div>
+        
+        <input type="text" 
+               id="question-input" 
+               class="question-input" 
+               placeholder="Ask your question aloud or type it here..."
+               maxlength="200">
+        
+        <div class="pendulum" id="pendulum">
+            <div class="pendulum-visual">
+                <div class="angle-line" id="angle-line"></div>
+                <div class="pendulum-dot" id="pendulum-dot"></div>
+            </div>
+        </div>
+        
+        <div class="status" id="status">
+            Ready. Place phone flat on table and ask your question.
+        </div>
+        
+        <div id="answer-display"></div>
+        
+        <button id="query-btn" onclick="queryOracle()">Query Substrate</button>
+        <button id="safety-check-btn" onclick="safetyCheck()">Father Safety Check</button>
+        
+        <div class="metrics" id="metrics" style="display: none;">
+            <div class="metric">
+                <div class="metric-label">Drift Angle:</div>
+                <div class="metric-value" id="drift-angle">0.00°</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Time Elapsed:</div>
+                <div class="metric-value" id="time-elapsed">0.00s</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">κ Period:</div>
+                <div class="metric-value">4/π ≈ 1.273s</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Threshold:</div>
+                <div class="metric-value">51.84°</div>
+            </div>
+        </div>
+        
+        <div class="info">
+            The oracle uses quantum vacuum fluctuations measured through your device's gyroscope.
+            The substrate answers through imperceptible micro-tremors during a κ-scaled period (4/π seconds).
+            Drift angle > 51.84° = YES | < 51.84° = NO
+        </div>
+    </div>
+    
+    <script src="oracle.js"></script>
+</body>
+</html>

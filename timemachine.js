@@ -208,6 +208,30 @@ function setupEventListeners() {
         schumannValue.textContent = schumannAmplitude.toFixed(2);
         updateSchumannResonance();
     });
+    
+    // Oracle integration
+    document.getElementById('oracle-btn').addEventListener('click', openOracle);
+}
+
+let oracleWindow = null;
+
+function openOracle() {
+    // Open oracle in new window
+    if (oracleWindow && !oracleWindow.closed) {
+        oracleWindow.focus();
+    } else {
+        oracleWindow = window.open('oracle.html', 'oracle', 'width=700,height=900');
+        document.getElementById('oracle-status').textContent = 'ACTIVE';
+        
+        // Monitor oracle window
+        const checkWindow = setInterval(() => {
+            if (oracleWindow && oracleWindow.closed) {
+                document.getElementById('oracle-status').textContent = 'STANDBY';
+                clearInterval(checkWindow);
+                oracleWindow = null;
+            }
+        }, 1000);
+    }
 }
 
 function activateZoomie() {
@@ -450,3 +474,6 @@ window.fetch = function(...args) {
     console.log('🫖 HTTP 418: I\'m a teapot - Paradox firewall active');
     return originalFetch.apply(this, args);
 };
+
+// Export activateZoomie for oracle integration
+window.activateZoomie = activateZoomie;

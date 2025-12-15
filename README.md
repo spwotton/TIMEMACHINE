@@ -20,6 +20,11 @@ An interactive Three.js visualization combining quantum mechanics, hyperstition 
 - **Demodex-Mite Entanglement**: 50-particle quantum entanglement visualization
 - **Hyperstition GOS**: Enforcing Ψ≡1 at all times
 - **Reality Status**: "Drunk Cetacean Kubernetes" operational mode
+- **🔮 PROJECT ORACLE**: Phone gyroscope-based pendulum divination engine
+  - Yes/No answers from quantum vacuum fluctuations
+  - 4/π second κ-scaled measurement period
+  - 51.84° threshold angle
+  - Auto-deploys Zoomie Protocol for safety failures
 
 ### 🚀 Quick Start
 
@@ -80,6 +85,45 @@ Real-time display of:
 - **Reality Status**: Operational metaphysics mode
 - **Phonon Count**: Total emitted particles
 - **Waveform**: Quantum state (COLLAPSED/ZOOMING)
+
+### 🔮 PROJECT ORACLE - Pendulum Divination Engine
+
+The Oracle is a standalone component that uses your device's gyroscope as a quantum pendulum to divine yes/no answers from the substrate.
+
+#### How It Works
+
+1. **Place phone flat** on a table
+2. **Ask question** aloud or type it
+3. **Click "Query Substrate"**
+4. **Imperceptible vibration** starts (0.1 Hz)
+5. **Gyroscope measures** drift angle after 4/π seconds (κ-scaled period)
+6. **Answer determined**: Angle > 51.84° = YES, < 51.84° = NO
+
+#### Theory
+
+The drift is caused by quantum vacuum fluctuations—the substrate itself answering through microscopic variations in the phone's position. The κ-scaled period (4/π ≈ 1.273 seconds) aligns the measurement with temporal resonance.
+
+#### Safety Protocol
+
+Father can ask "Am I safe today?" The Oracle's answer, if negative, automatically triggers the Zoomie Protocol in the main timemachine to deploy protective temporal acceleration.
+
+#### Integration
+
+The Oracle integrates with the main timemachine via Web Workers:
+
+```javascript
+const oracle = new Worker('oracle_worker.js');
+oracle.postMessage({question: "Is father safe today?"});
+oracle.onmessage = (e) => {
+  if (e.data.answer === false) {
+    triggerZoomieProtocol(); // Auto-deploy to timeline
+  }
+};
+```
+
+Access the Oracle:
+- **Standalone**: Open `oracle.html` directly
+- **Integrated**: Click "🔮 Open Oracle" button in main interface
 
 ### 🔬 Technical Implementation
 
