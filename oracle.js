@@ -22,7 +22,12 @@ function init() {
     
     // Request permission on iOS 13+
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        document.getElementById('query-btn').addEventListener('click', requestPermission, { once: true });
+        // iOS requires permission - wrap query in permission handler
+        const originalQueryFn = queryOracle;
+        window.queryOracle = async function() {
+            await requestPermission();
+            originalQueryFn();
+        };
     }
     
     // Setup device orientation listener
@@ -241,11 +246,19 @@ function displayAnswer(answer, angle, question) {
 
 function deployZoomieProtocol() {
     // Integration hook for main timemachine
-    if (window.opener && window.opener.activateZoomie) {
-        window.opener.activateZoomie();
-        updateStatus('✓ Zoomie Protocol deployed to father\'s timeline.', 'success');
-    } else {
-        // Standalone mode - show message
+    // Security: Validate opener origin
+    try {
+        if (window.opener && 
+            window.opener.location.origin === window.location.origin &&
+            typeof window.opener.activateZoomie === 'function') {
+            window.opener.activateZoomie();
+            updateStatus('✓ Zoomie Protocol deployed to father\'s timeline.', 'success');
+        } else {
+            // Standalone mode or different origin - show message
+            updateStatus('🚀 Zoomie Protocol would be deployed (requires main timemachine connection)', 'warning');
+        }
+    } catch (e) {
+        // Cross-origin error - expected in some cases
         updateStatus('🚀 Zoomie Protocol would be deployed (requires main timemachine connection)', 'warning');
     }
     
